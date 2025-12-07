@@ -16,7 +16,6 @@ const CampView = ({ money, playerModules, onBuyItem, onRemoveCard, onStartRun })
        </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Modules */}
           <div>
              <h3 className="text-zinc-400 font-bold mb-4 flex items-center gap-2"><Cpu size={16}/> 战术模块</h3>
              <div className="grid grid-cols-1 gap-2">
@@ -42,7 +41,6 @@ const CampView = ({ money, playerModules, onBuyItem, onRemoveCard, onStartRun })
              </div>
           </div>
 
-          {/* Cards */}
           <div>
              <h3 className="text-zinc-400 font-bold mb-4 flex items-center gap-2"><ShoppingBag size={16}/> 战斗卡牌</h3>
              <div className="grid grid-cols-2 gap-2">

@@ -21,9 +21,9 @@ export default function App() {
         <div className="flex-1 relative bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 to-black overflow-hidden flex flex-col">
           
           {gameState === GAME_STATE.MENU && (
-             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 space-y-8 animate-in fade-in duration-700">
+             <div className="absolute inset-0 flex flex-col items-center justify-center z-50 space-y-8 bg-zinc-950/80 backdrop-blur-sm">
                 <div className="text-center space-y-2">
-                  <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 tracking-tighter">零号战区</h1>
+                  <h1 className="text-6xl font-black text-white tracking-tighter drop-shadow-lg">零号战区</h1>
                   <p className="text-zinc-500 font-mono tracking-widest text-sm">战术卡牌构筑</p>
                 </div>
                 <button 
@@ -35,10 +35,13 @@ export default function App() {
              </div>
           )}
 
-          {gameState === GAME_STATE.EXPLORING && (
+          {/* 同时处理 MAP_SELECT 和 EXPLORING */}
+          {(gameState === GAME_STATE.EXPLORING || gameState === GAME_STATE.MAP_SELECT) && (
             <ExplorationView 
+              gameState={gameState} 
+              mapOptions={state.mapOptions} 
               explorationCard={state.explorationCard}
-              onNextStep={actions.nextStep}
+              onSelectNode={actions.selectMapNode}
               onCombatStart={actions.startCombat}
               onCollect={actions.collectLoot}
               onExtract={actions.extract}
@@ -48,6 +51,7 @@ export default function App() {
           {gameState === GAME_STATE.COMBAT && (
             <CombatView 
               enemy={state.enemy}
+              enemyStatus={state.enemyStatus}
               hand={state.hand}
               combatDeck={state.combatDeck}
               discardPile={state.discardPile}
@@ -69,7 +73,7 @@ export default function App() {
           )}
 
           {gameState === GAME_STATE.VICTORY && (
-            <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-in fade-in">
+            <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
                <div className="text-center">
                   <h2 className="text-4xl font-bold text-yellow-400 mb-2">目标确认清除</h2>
                   <p className="text-zinc-400 mb-8">区域安全。物资已截获。</p>
@@ -82,7 +86,7 @@ export default function App() {
           )}
 
           {gameState === GAME_STATE.GAME_OVER && (
-            <div className="absolute inset-0 bg-red-950/90 z-50 flex items-center justify-center p-4 animate-in fade-in">
+            <div className="absolute inset-0 bg-red-950/90 z-50 flex items-center justify-center p-4">
                <div className="text-center">
                   <h2 className="text-5xl font-black text-red-500 mb-4 tracking-tighter">任务失败</h2>
                   <p className="text-red-200/50 mb-8">生命体征消失。资产回收不可行。</p>
