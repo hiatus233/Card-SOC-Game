@@ -1,8 +1,13 @@
 import React from 'react';
 import { Cpu, ShoppingBag, Trash2 } from 'lucide-react';
-import { MODULE_LIBRARY, CARD_LIBRARY } from '../constants/gameData';
+import { DataManager } from '../services/DataManager';
 
 const CampView = ({ money, playerModules, onBuyItem, onRemoveCard, onStartRun }) => {
+  // 从 DataManager 获取数据
+  const allModules = DataManager.getAllModules();
+  // 只展示非基础卡牌用于购买 (假设前 5 张是基础卡)
+  const allCards = DataManager.getAllCards().slice(5); 
+  
   const hasModule = (id) => playerModules.some(m => m.id === id);
 
   return (
@@ -19,7 +24,7 @@ const CampView = ({ money, playerModules, onBuyItem, onRemoveCard, onStartRun })
           <div>
              <h3 className="text-zinc-400 font-bold mb-4 flex items-center gap-2"><Cpu size={16}/> 战术模块</h3>
              <div className="grid grid-cols-1 gap-2">
-                {MODULE_LIBRARY.map(mod => {
+                {allModules.map(mod => {
                    const owned = hasModule(mod.id);
                    return (
                      <button 
@@ -44,7 +49,7 @@ const CampView = ({ money, playerModules, onBuyItem, onRemoveCard, onStartRun })
           <div>
              <h3 className="text-zinc-400 font-bold mb-4 flex items-center gap-2"><ShoppingBag size={16}/> 战斗卡牌</h3>
              <div className="grid grid-cols-2 gap-2">
-                {CARD_LIBRARY.slice(5).map(card => (
+                {allCards.map(card => (
                    <button 
                      key={card.id}
                      onClick={() => onBuyItem(card, 'CARD')}

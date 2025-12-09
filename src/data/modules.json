@@ -1,0 +1,7 @@
+[
+  { "id": "auto_loader", "name": "自动装填机", "price": 120, "desc": "战斗开始时，获得 2 发弹药。", "trigger": "COMBAT_START" },
+  { "id": "nano_vest", "name": "纳米背心", "price": 100, "desc": "每回合开始时，获得 3 点格挡。", "trigger": "TURN_START" },
+  { "id": "scavenger", "name": "回收协议", "price": 80, "desc": "战斗胜利获得的金钱增加 25%。", "trigger": "PASSIVE" },
+  { "id": "vampire", "name": "吸血鬼芯片", "price": 150, "desc": "每打出一张耗血卡牌，回复 1 点生命。", "trigger": "ON_HP_COST" },
+  { "id": "stim_injector", "name": "肾上腺素", "price": 110, "desc": "当生命值低于 30% 时，造成伤害 +50%。", "trigger": "PASSIVE_DMG" }
+]

@@ -1,0 +1,8 @@
+{
+  "sniper": { "name": "游荡狙击手", "hp": 25, "dmg": 5, "loot": 30 },
+  "loot_goblin": { "name": "拾荒窃贼", "hp": 15, "dmg": 5, "loot": 60 },
+  "rad_roach": { "name": "辐射巨蟑", "hp": 40, "dmg": 8, "loot": 20 },
+  "scavenger": { "name": "变异拾荒者", "hp": 20, "dmg": 6, "loot": 15 },
+  "guard": { "name": "安保机器人", "hp": 30, "dmg": 4, "loot": 25 },
+  "heavy": { "name": "重装暴徒", "hp": 60, "dmg": 10, "loot": 50 }
+}

@@ -1,0 +1,6 @@
+{
+  "RUINS": { "id": "RUINS", "name": "城市废墟", "color": "zinc", "desc": "普通的探索区域。", "risk": 1 },
+  "ARSENAL": { "id": "ARSENAL", "name": "军火库", "color": "red", "desc": "高危区域。大量弹药补给。", "risk": 2 },
+  "SUPPLY_DEPOT": { "id": "SUPPLY_DEPOT", "name": "物资站", "color": "amber", "desc": "可能有大量物资，或被掠夺者占据。", "risk": 1 },
+  "RAD_ZONE": { "id": "RAD_ZONE", "name": "辐射区", "color": "green", "desc": "持续辐射伤害。极其危险的敌人。", "risk": 3 }
+}

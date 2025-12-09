@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { shuffle } from '../utils/gameUtils';
-import { GAME_STATE, CARD_TYPES, ENEMY_INTENTS, INITIAL_DECK, STATUS_TYPES, LOCATION_TYPES } from '../constants/gameData';
+import { DataManager } from '../services/DataManager';
+import { GAME_STATE, CARD_TYPES, ENEMY_INTENTS, STATUS_TYPES } from '../constants/gameData';
 
 export const useGame = () => {
   // Global State
@@ -9,7 +10,7 @@ export const useGame = () => {
   
   // Player Data
   const [money, setMoney] = useState(100);
-  const [playerDeck, setPlayerDeck] = useState([...INITIAL_DECK]);
+  const [playerDeck, setPlayerDeck] = useState(DataManager.getInitialDeck());
   const [playerModules, setPlayerModules] = useState([]);
   const [maxHp] = useState(80);
   const [hp, setHp] = useState(80);
@@ -91,7 +92,7 @@ export const useGame = () => {
   // --- Map Logic ---
   const generateMapOptions = (dist) => {
     const opts = [];
-    const types = Object.values(LOCATION_TYPES);
+    const types = DataManager.getLocationTypeList();
     const count = 2 + (dist > 3 ? 1 : 0);
     for(let i=0; i<count; i++) {
       const type = types[Math.floor(Math.random() * types.length)];
@@ -110,6 +111,35 @@ export const useGame = () => {
     setGameState(GAME_STATE.MAP_SELECT); 
     addLog("=== 任务开始 ===");
     addLog("请选择前进路线...");
+  };
+
+  const createEnemy = (dist, forceId = null, isElite = false) => {
+    const difficulty = Math.floor(dist / 5);
+    let id = forceId;
+    
+    if (!id) {
+       const pool = ['scavenger', 'guard'];
+       if (dist > 3) pool.push('sniper');
+       if (dist > 5) pool.push('heavy');
+       id = pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    const templates = DataManager.getEnemyTemplates();
+    const t = templates[id] || templates['scavenger'];
+    
+    return {
+      type: 'ENEMY',
+      data: {
+        id: id,
+        name: (isElite ? '精英·' : '') + t.name,
+        maxHp: Math.floor(t.hp * (1 + difficulty * 0.2) * (isElite ? 1.5 : 1)),
+        hp: Math.floor(t.hp * (1 + difficulty * 0.2) * (isElite ? 1.5 : 1)),
+        baseDmg: t.dmg + difficulty,
+        isElite: isElite,
+        loot: t.loot * (isElite ? 2 : 1),
+        intent: null
+      }
+    };
   };
 
   const selectMapNode = (nodeType) => {
@@ -140,54 +170,16 @@ export const useGame = () => {
     setGameState(GAME_STATE.EXPLORING);
   };
 
-  // --- 修复点：之前漏掉了这个函数 ---
   const collectLoot = () => {
     if (!explorationCard) return;
     if (explorationCard.val) setCurrentLoot(p => p + explorationCard.val);
     if (explorationCard.ammo) setGlobalAmmo(p => p + explorationCard.ammo);
     setExplorationCard(null);
     addLog("资源已获取。");
-    // 获取完物资后，直接进入下一次地图选择
+    
     const opts = generateMapOptions(distance);
     setMapOptions(opts);
     setGameState(GAME_STATE.MAP_SELECT);
-  };
-  // ---------------------------------
-
-  const createEnemy = (dist, forceId = null, isElite = false) => {
-    const difficulty = Math.floor(dist / 5);
-    let id = forceId;
-    
-    if (!id) {
-       const pool = ['scavenger', 'guard'];
-       if (dist > 3) pool.push('sniper');
-       if (dist > 5) pool.push('heavy');
-       id = pool[Math.floor(Math.random() * pool.length)];
-    }
-
-    const templates = {
-      'sniper': { name: '游荡狙击手', hp: 25, dmg: 5, loot: 30 },
-      'loot_goblin': { name: '拾荒窃贼', hp: 15, dmg: 5, loot: 60 },
-      'rad_roach': { name: '辐射巨蟑', hp: 40, dmg: 8, loot: 20 },
-      'scavenger': { name: '变异拾荒者', hp: 20, dmg: 6, loot: 15 },
-      'guard': { name: '安保机器人', hp: 30, dmg: 4, loot: 25 },
-      'heavy': { name: '重装暴徒', hp: 60, dmg: 10, loot: 50 },
-    };
-
-    const t = templates[id] || templates['scavenger'];
-    return {
-      type: 'ENEMY',
-      data: {
-        id: id,
-        name: (isElite ? '精英·' : '') + t.name,
-        maxHp: Math.floor(t.hp * (1 + difficulty * 0.2) * (isElite ? 1.5 : 1)),
-        hp: Math.floor(t.hp * (1 + difficulty * 0.2) * (isElite ? 1.5 : 1)),
-        baseDmg: t.dmg + difficulty,
-        isElite: isElite,
-        loot: t.loot * (isElite ? 2 : 1),
-        intent: null
-      }
-    };
   };
 
   const startCombat = (enemyData) => {
@@ -236,6 +228,26 @@ export const useGame = () => {
     setCombatDeck(newDraw);
     setDiscardPile(newDiscard);
     setHand(newHand);
+  };
+
+  const resolveVictory = () => {
+    let lootVal = enemy.loot;
+    const modEffects = triggerModules('PASSIVE', { money: true });
+    if (modEffects.moneyMultiplier) lootVal = Math.floor(lootVal * modEffects.moneyMultiplier);
+    setCurrentLoot(prev => prev + lootVal);
+    addLog(`威胁消除。获得 $${lootVal}。`);
+    setExplorationCard(null); 
+    setGameState(GAME_STATE.VICTORY);
+  };
+
+  const handleWinLogic = (lastCard, lastIndex) => {
+    const newHand = [...hand];
+    newHand.splice(lastIndex, 1);
+    setHand(newHand);
+    setDiscardPile(prev => [...prev, lastCard]);
+    setTimeout(() => {
+       resolveVictory();
+    }, 500);
   };
 
   const playCard = (card, index) => {
@@ -303,16 +315,6 @@ export const useGame = () => {
     setDiscardPile(prev => [...prev, card]);
   };
 
-  const handleWinLogic = (lastCard, lastIndex) => {
-    const newHand = [...hand];
-    newHand.splice(lastIndex, 1);
-    setHand(newHand);
-    setDiscardPile(prev => [...prev, lastCard]);
-    setTimeout(() => {
-       resolveVictory();
-    }, 500);
-  };
-
   const endTurn = () => {
     let currentEnemyHp = enemy.hp;
     if (enemyStatus[STATUS_TYPES.RADIATION] > 0) {
@@ -366,17 +368,6 @@ export const useGame = () => {
 
     const nextDiscard = [...discardPile, ...hand];
     startTurn(combatDeck, nextDiscard, enemy, turnCount + 1);
-  };
-
-  const resolveVictory = () => {
-    let lootVal = enemy.loot;
-    const modEffects = triggerModules('PASSIVE', { money: true });
-    if (modEffects.moneyMultiplier) lootVal = Math.floor(lootVal * modEffects.moneyMultiplier);
-    setCurrentLoot(prev => prev + lootVal);
-    addLog(`威胁消除。获得 $${lootVal}。`);
-    
-    setExplorationCard(null); 
-    setGameState(GAME_STATE.VICTORY);
   };
 
   const handleVictoryContinue = () => {
