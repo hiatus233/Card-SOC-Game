@@ -6,7 +6,7 @@ const ExplorationView = ({ gameState, explorationCard, mapOptions, onSelectNode,
   // 阶段 1：地图选择
   if (gameState === GAME_STATE.MAP_SELECT) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-500">
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
         <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-2">
           <MapPin className="text-cyan-400" /> 选择行进路线
         </h2>
@@ -62,7 +62,7 @@ const ExplorationView = ({ gameState, explorationCard, mapOptions, onSelectNode,
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8">
         {explorationCard && (
-          <div className="w-full max-w-md animate-in zoom-in duration-300">
+          <div className="w-full max-w-md">
              <div className={`
                 relative overflow-hidden rounded-2xl border bg-zinc-900 shadow-2xl p-8 flex flex-col items-center text-center
                 ${explorationCard.type === 'ENEMY' ? (explorationCard.data.isElite ? 'border-purple-500/50 shadow-purple-900/20' : 'border-red-500/50 shadow-red-900/20') : 'border-zinc-700'}
